@@ -83,7 +83,7 @@ const deleteContact = asyncHandler(async(req, res) => {
     }
 
     await Contact.deleteOne({_id: req.params.id})
-    res.status(200).json({"dataStatus": "Removed Successfully!"})
+    res.status(200).json({"dataStatus": "Removed Successfully!"}) 
 })
 
 module.exports = {getContacts, getContact, createContact, updateContact, deleteContact}
