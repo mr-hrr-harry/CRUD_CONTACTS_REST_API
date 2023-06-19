@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const User= require('../model/userModel')
+require('dotenv')
 
 //@desc: POST: register user
 //@route: /api/users/register
@@ -27,7 +29,7 @@ const registerUser = asyncHandler( async (req, res) => {
         username, emailid, password: hashedPassword, 
     })
     if(newUser){
-        res.status(201).json({_id: newUser.id, email: newUser.emailid})
+        res.status(201).json({Userid: newUser.id, emailid: newUser.emailid})       // just to print the inserted data
     }
     else{
         res.status(400)
@@ -41,7 +43,33 @@ const registerUser = asyncHandler( async (req, res) => {
 //@access: public
 
 const loginUser = asyncHandler( async (req, res) => {
-    res.json({message: "Old User"})
+    const {emailid, password} = req.body
+    if(!emailid || !password){
+        res.status(400)
+        throw new Error("Enter all the fields!")
+    }
+    const user = await User.findOne({emailid: emailid})
+    if(user && (bcrypt.compare(password, user.password)) ){          //compare user entry with db password!
+        
+        const accessToken = jwt.sign(
+            {
+                user:{
+                    username: user.username,            // Generate a web token using the 3 credentials
+                    emailid: user.emailid,
+                    id: user.id,
+                }
+            },
+            process.env.ACCESS_TOKEN_SECRET,
+            {
+                expiresIn: "2m"
+            }
+        )
+        res.status(200).json({AccessToken : accessToken})
+    }
+    else{
+        res.status(401)
+        throw new Error("Incorrect user credentials!")
+    }
 })
 
 //@desc: curent user
