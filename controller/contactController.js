@@ -2,16 +2,18 @@ const asyncHandler = require("express-async-handler")
 const Contact = require("../model/contactModel")
 
 //@desc: get all contacts
-//@route: /api/contacts
+//@route: GET: /api/contacts
 //@access: public
+
 const getContacts = asyncHandler(async(req, res) => {                // select *
     const contacts = await Contact.find()
     res.status(200).json(contacts)
 })
 
 //@desc: get one contact
-//@route: /api/contacts/:id
+//@route: GET: /api/contacts/:id
 //@access: public
+
 const getContact = asyncHandler( async(req, res) => {       // select <id>
 
     const contact = await Contact.findById(req.params.id)
@@ -29,8 +31,9 @@ const getContact = asyncHandler( async(req, res) => {       // select <id>
 })
 
 //@desc: create new contact
-//@route: /api/contacts/
+//@route: POST: /api/contacts/
 //@access: public
+
 const createContact = asyncHandler(async(req, res) => {               // insert
     console.log(req.body)
     const {name, email, phoneNo} = req.body
@@ -54,8 +57,9 @@ const createContact = asyncHandler(async(req, res) => {               // insert
 })
 
 //@desc: update contact
-//@route: /api/contact/:id
+//@route: PUT: /api/contact/:id
 //@access: public
+
 const updateContact = asyncHandler(async(req, res) => {             // update
 
     const contact = await Contact.findById(req.params.id)
@@ -72,8 +76,9 @@ const updateContact = asyncHandler(async(req, res) => {             // update
 })
 
 //@desc: delete contact
-//@route: /api/contact/:id
+//@route: DELETE: /api/contact/:id
 //@access: public
+
 const deleteContact = asyncHandler(async(req, res) => {
 
     const contact  = await Contact.findById(req.params.id)
