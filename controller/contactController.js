@@ -3,16 +3,16 @@ const Contact = require("../model/contactModel")
 
 //@desc: get all contacts
 //@route: GET: /api/contacts
-//@access: public
+//@access: private
 
 const getContacts = asyncHandler(async(req, res) => {                // select *
-    const contacts = await Contact.find()
+    const contacts = await Contact.find({user_id : req.user.id})
     res.status(200).json(contacts)
 })
 
 //@desc: get one contact
 //@route: GET: /api/contacts/:id
-//@access: public
+//@access: private
 
 const getContact = asyncHandler( async(req, res) => {       // select <id>
 
@@ -32,7 +32,7 @@ const getContact = asyncHandler( async(req, res) => {       // select <id>
 
 //@desc: create new contact
 //@route: POST: /api/contacts/
-//@access: public
+//@access: private
 
 const createContact = asyncHandler(async(req, res) => {               // insert
     console.log(req.body)
@@ -44,7 +44,7 @@ const createContact = asyncHandler(async(req, res) => {               // insert
         throw new Error("Check out the fields for non empty!")
     }
     const contact = await Contact.create({
-        name, email, phoneNo,                                        // stored in abode object
+        name, email, phoneNo, user_id: req.user.id                             // stored in abode object
     })
     // res.status(201).json(contact) // (or)
     try{
@@ -58,7 +58,7 @@ const createContact = asyncHandler(async(req, res) => {               // insert
 
 //@desc: update contact
 //@route: PUT: /api/contact/:id
-//@access: public
+//@access: private
 
 const updateContact = asyncHandler(async(req, res) => {             // update
 
@@ -67,6 +67,12 @@ const updateContact = asyncHandler(async(req, res) => {             // update
         res.status(404)
         throw new Error("It seems contact doesn't exists!")
     }
+
+    if(contact.user_id.toString() !== req.user.id){
+        res.status(403)
+        throw new Error("Third party updation denied!")
+    }
+
     const updated = await Contact.findByIdAndUpdate(
         req.params.id,
         req.body,
@@ -77,7 +83,7 @@ const updateContact = asyncHandler(async(req, res) => {             // update
 
 //@desc: delete contact
 //@route: DELETE: /api/contact/:id
-//@access: public
+//@access: private
 
 const deleteContact = asyncHandler(async(req, res) => {
 
@@ -85,6 +91,11 @@ const deleteContact = asyncHandler(async(req, res) => {
     if(!contact){
         res.status(404)
         throw new Error("Oops, Contact not Found!")
+    }
+
+    if(contact.user_id.toString() !== req.user.id){
+        res.status(403)
+        throw new Error("Third party deletion denied!")
     }
 
     await Contact.deleteOne({_id: req.params.id})
